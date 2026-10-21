@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f1e7cd" />
+  <title>Case File Access</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #392719;
+      --ink-soft: #654a30;
+      --paper: #f7efdd;
+      --paper-light: #fff9ed;
+      --gold: #b18a37;
+      --gold-soft: #d6c184;
+      --red: #a94e3f;
+      --rule: #806744;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 32px 18px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 50% 46%, rgba(255, 251, 239, .62), transparent 54%),
+        linear-gradient(135deg, #f5ecd6, #efe3c7);
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    [hidden] { display: none !important; }
+
+    .access-card {
+      position: relative;
+      width: min(100%, 520px);
+      min-height: 490px;
+      padding: 70px 44px 38px;
+      border: 1px solid #70583b;
+      background: rgba(248, 241, 225, .94);
+      box-shadow: 0 12px 24px rgba(70, 48, 23, .16), inset 0 0 42px rgba(196, 165, 105, .08);
+      text-align: center;
+    }
+
+    .tape {
+      position: absolute;
+      z-index: 2;
+      top: -8px;
+      width: 70px;
+      height: 19px;
+      background: rgba(207, 187, 119, .72);
+      box-shadow: 0 1px 1px rgba(88, 68, 33, .07);
+    }
+
+    .tape-left { left: 25px; transform: rotate(-4deg); }
+    .tape-right { right: 24px; transform: rotate(3deg); }
+
+    .stamp {
+      position: absolute;
+      top: 13px;
+      right: -8px;
+      z-index: 3;
+      width: 194px;
+      padding: 7px 8px 6px;
+      border: 3px solid rgba(169, 69, 55, .9);
+      color: var(--red);
+      background: rgba(247, 239, 221, .64);
+      transform: rotate(17deg);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .stamp strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .19em;
+      line-height: 1.1;
+    }
+
+    .stamp small {
+      display: block;
+      margin-top: 2px;
+      color: #603a2c;
+      font: 700 7px/1.1 'Courier New', monospace;
+      letter-spacing: .025em;
+    }
+
+    .repository {
+      margin: 0 0 8px;
+      color: #6b5236;
+      font-size: 11px;
+      letter-spacing: .29em;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #21170f;
+      font-size: clamp(22px, 5vw, 26px);
+      font-weight: 700;
+      letter-spacing: .055em;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      max-width: 410px;
+      margin: 0 auto;
+      color: #523b27;
+      font: 12px/1.5 'Courier New', Courier, monospace;
+    }
+
+    .solid-rule {
+      height: 1px;
+      margin: 18px 0 24px;
+      border: 0;
+      background: #6f5638;
+    }
+
+    .notice {
+      padding: 12px 0 13px;
+      border-top: 1px dashed #9a815c;
+      border-bottom: 1px dashed #9a815c;
+      color: #58452e;
+      font: 10px/1.76 'Courier New', Courier, monospace;
+      letter-spacing: .005em;
+      text-transform: uppercase;
+    }
+
+    .access-form {
+      margin-top: 17px;
+      text-align: left;
+    }
+
+    .access-form label {
+      display: block;
+      margin-bottom: 8px;
+      color: #442f1c;
+      font-size: 12px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .access-form input {
+      display: block;
+      width: 100%;
+      height: 41px;
+      padding: 0 12px;
+      border: 2px solid var(--gold);
+      border-radius: 0;
+      outline: 0;
+      color: #49341f;
+      background: var(--paper-light);
+      box-shadow: inset 0 1px 3px rgba(68, 47, 28, .08);
+      font: 15px 'Courier New', Courier, monospace;
+      letter-spacing: .035em;
+    }
+
+    .access-form input::placeholder {
+      color: #8f7a5c;
+      opacity: 1;
+    }
+
+    .access-form input:focus {
+      border-color: #987127;
+      box-shadow: 0 0 0 2px rgba(177, 138, 55, .16), inset 0 1px 3px rgba(68, 47, 28, .08);
+    }
+
+    .access-form button {
+      display: block;
+      width: 100%;
+      min-height: 35px;
+      margin-top: 16px;
+      border: 1px solid #2c1d11;
+      border-radius: 0;
+      color: #fff7e8;
+      background: #302012;
+      cursor: pointer;
+      font: 700 13px/1.2 Georgia, 'Times New Roman', serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      transition: background-color .16s ease, color .16s ease;
+    }
+
+    .access-form button:hover,
+    .access-form button:focus-visible {
+      color: #fff9ee;
+      background: #62431f;
+    }
+
+    .access-form button:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .feedback {
+      min-height: 14px;
+      margin: 8px 0 -20px;
+      color: #9b4639;
+      font: 10px/1.4 'Courier New', Courier, monospace;
+      letter-spacing: .05em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .record-card {
+      width: min(100%, 720px);
+      padding: clamp(30px, 7vw, 64px);
+      border: 1px solid #70583b;
+      background: rgba(248, 241, 225, .96);
+      box-shadow: 0 16px 38px rgba(70, 48, 23, .16), inset 0 0 45px rgba(196, 165, 105, .07);
+      animation: appear .45s ease both;
+    }
+
+    .record-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #9a815c;
+      color: #775d3e;
+      font: 10px/1.4 'Courier New', Courier, monospace;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .record-head .error-tag { color: var(--red); }
+
+    .record-title {
+      margin: 27px 0 8px;
+      color: #352516;
+      font-size: clamp(44px, 9vw, 70px);
+      font-weight: 400;
+      letter-spacing: -.06em;
+      line-height: .95;
+    }
+
+    .record-subtitle {
+      margin: 0 0 27px;
+      color: #8d6e40;
+      font: 700 10px/1.4 'Courier New', Courier, monospace;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .record-message {
+      margin: 0;
+      color: #4e3923;
+      font-size: clamp(18px, 3vw, 23px);
+      line-height: 1.9;
+    }
+
+    .record-message mark {
+      padding: .08em .16em .13em;
+      color: inherit;
+      background: linear-gradient(180deg, transparent 5%, rgba(222, 193, 126, .76) 5%, rgba(222, 193, 126, .76) 94%, transparent 94%);
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+      text-decoration: underline;
+      text-decoration-color: rgba(153, 108, 42, .56);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+    }
+
+    .record-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 34px;
+      padding-top: 13px;
+      border-top: 1px dashed #aa9168;
+      color: #957b55;
+      font: 9px/1.4 'Courier New', Courier, monospace;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 24px 15px; }
+      .access-card { min-height: 0; padding: 76px 24px 34px; }
+      .stamp { right: -5px; width: 170px; }
+      .stamp strong { font-size: 14px; }
+      .repository { font-size: 9px; letter-spacing: .22em; }
+      .notice { font-size: 9px; line-height: 1.7; }
+      .record-head { font-size: 9px; letter-spacing: .09em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="access-card" id="access-card" aria-labelledby="access-heading">
+      <span class="tape tape-left" aria-hidden="true"></span>
+      <span class="tape tape-right" aria-hidden="true"></span>
+      <div class="stamp" aria-hidden="true">
+        <strong>RESTRICTED</strong>
+        <small>BAY AREA PRESS REPOSITORY<br />FORM BAPR-09 · REV. 1/65</small>
+      </div>
+
+      <p class="repository">Bay Area Press Repository</p>
+      <h1 id="access-heading">Case File Access</h1>
+      <p class="subtitle">San Francisco, California — Newspaper Microfilm &amp; Clippings Archive</p>
+      <hr class="solid-rule" />
+
+      <div class="notice">
+        This record has been transferred from active case files.<br />
+        Unauthorized access, duplication, or distribution of these<br class="desktop-break" />
+        materials is prohibited under State Archives Regulation §412.7.
+      </div>
+
+      <form class="access-form" id="access-form" autocomplete="off">
+        <label for="access-code">Enter access code:</label>
+        <input
+          id="access-code"
+          name="access-code"
+          type="password"
+          placeholder="— code required —"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          required
+          aria-describedby="feedback"
+        />
+        <button type="submit">Access File</button>
+        <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="record-card" id="record-card" aria-labelledby="record-title" hidden>
+      <div class="record-head">
+        <span>Bay Area Press Repository</span>
+        <span class="error-tag">Route error / 404</span>
+      </div>
+      <h2 class="record-title" id="record-title">404</h2>
+      <p class="record-subtitle">Misrouted record · access granted</p>
+      <p class="record-message"><mark>The Zodiac signed with a cross-circle hid in plain sight. What you seek waits in the house where you are taught, at the level where every journey begins. The map is here, but the mark is there ;at the lowest</mark></p>
+      <div class="record-foot">
+        <span>Page not found</span>
+        <span>Archive copy · unresolved</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="/level-session.js?v=team-2"></script>
+<script>
+(() => {
+  const form = document.getElementById('access-form');
+  const input = document.getElementById('access-code');
+  const feedback = document.getElementById('feedback');
+  const button = form.querySelector('button');
+  let verifying = false;
+  function reveal() {
+    document.getElementById('access-card').hidden = true;
+    document.getElementById('record-card').hidden = false;
+    document.title = '404 — Misrouted Record';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (verifying || !form.reportValidity()) return;
+    verifying = true; button.disabled = true; feedback.textContent = 'Checking and saving…';
+    const password = input.value; input.value = '';
+    try { await ZodiacLevels.verify(4, password); reveal(); }
+    catch (error) { ZodiacLevels.errorMessage(error, feedback); input.focus(); }
+    finally { verifying = false; button.disabled = false; }
+  });
+  ZodiacLevels.watch(4, () => reveal());
+})();
+</script>
+</body>
+</html>

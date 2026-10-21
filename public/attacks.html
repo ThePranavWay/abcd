@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case File Access</title>
+<style>
+  :root {
+    --ink: #2b1d12;
+    --brown: #5c4033;
+    --gold: #b8922a;
+    --gold-light: #f6edd0;
+    --paper: #f7efdc;
+    --muted: #7a6a58;
+    --stamp: #a84434;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background: #efe3c9;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ---------- Gate (landing page) ---------- */
+  #gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .sheet {
+    position: relative;
+    width: 100%;
+    max-width: 470px;
+    background: linear-gradient(180deg, #faf4e4, var(--paper));
+    border: 1px solid #4a3a2c;
+    padding: 46px 34px 40px;
+    box-shadow: 0 10px 30px rgba(92, 64, 51, .18);
+  }
+  .tape {
+    position: absolute;
+    top: -12px;
+    width: 72px;
+    height: 22px;
+    background: rgba(201, 162, 39, .55);
+  }
+  .tape.l { left: 26px; transform: rotate(-2deg); }
+  .tape.r { right: 26px; transform: rotate(2deg); }
+  .stamp {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    border: 3px solid var(--stamp);
+    color: var(--stamp);
+    padding: 4px 12px;
+    font-weight: bold;
+    font-size: 17px;
+    letter-spacing: 4px;
+    transform: rotate(-12deg);
+    opacity: .85;
+    border-radius: 3px;
+  }
+  .form-no {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin-bottom: 26px;
+    margin-top: 18px;
+  }
+  .agency {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #4f6a78;
+    text-transform: uppercase;
+  }
+  .title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 10px 0 12px;
+  }
+  .sub {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--brown);
+    line-height: 1.6;
+  }
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--ink);
+    margin: 20px 0;
+  }
+  .notice {
+    border-top: 1px dashed var(--muted);
+    border-bottom: 1px dashed var(--muted);
+    padding: 14px 4px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--brown);
+    text-transform: uppercase;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin: 22px 0 8px;
+  }
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 16px;
+    background: #fdf8e8;
+    border: 2px solid var(--gold);
+    color: var(--ink);
+    outline: none;
+    letter-spacing: 3px;
+  }
+  input[type="password"]:focus { border-color: var(--brown); }
+  input::placeholder { color: #9a8a74; letter-spacing: 1px; }
+  button {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--ink);
+    color: #f7efdc;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 3px;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover { background: #3f2c1d; }
+  .error {
+    min-height: 18px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--stamp);
+    text-align: center;
+  }
+
+  /* ---------- Unlocked content ---------- */
+  #content { display: none; min-height: 100vh; }
+  #content.show { display: block; }
+  .browser-bar {
+    background: #e9e1d2;
+    border-bottom: 2px solid var(--gold);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--brown); opacity: .5; }
+  .address {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #d6c9a8;
+    border-radius: 16px;
+    padding: 6px 14px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .address b { color: #b03a2e; font-weight: normal; }
+  .error-header { text-align: center; padding: 40px 20px 10px; }
+  .code { font-size: 72px; color: var(--gold); font-weight: bold; letter-spacing: 2px; }
+  .etitle { font-size: 26px; color: var(--brown); margin-top: 6px; }
+  .esub {
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+  .divider {
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 24px auto;
+  }
+  .card {
+    max-width: 780px;
+    margin: 0 auto 50px;
+    background: #fff;
+    border: 1px solid #e0cf9a;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(92, 64, 51, .15);
+    padding: 18px;
+  }
+  .card-label {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--brown);
+    background: var(--gold-light);
+    border-left: 4px solid var(--gold);
+    padding: 8px 12px;
+    margin-bottom: 14px;
+  }
+  .card img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  .actions { text-align: center; margin-bottom: 40px; }
+  .btn {
+    display: inline-block;
+    background: var(--gold);
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 11px 26px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin: 0 6px;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    width: auto;
+    margin-top: 0;
+  }
+  .btn.alt { background: transparent; color: var(--brown); border: 1px solid var(--brown); }
+  footer {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #9a8a74;
+    padding-bottom: 24px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Landing / password gate -->
+<section id="gate">
+  <div class="sheet">
+    <div class="tape l"></div>
+    <div class="tape r"></div>
+    <div class="stamp">RESTRICTED</div>
+
+    <div class="form-no">BAY AREA PRESS REPOSITORY<br>FORM BAPR-19 (Rev. 1/69)</div>
+
+    <div class="agency">Bay Area Press Repository</div>
+    <div class="title">CASE FILE ACCESS</div>
+    <div class="sub">San Francisco, California &middot; Newspaper Microfilm &amp; Clippings Archive</div>
+
+    <hr class="rule">
+
+    <div class="notice">
+      This record has been transferred from active case files.<br>
+      Unauthorized access, duplication, or distribution of these<br>
+      materials is prohibited under state archives regulation &sect;41z.7.
+    </div>
+
+    <form id="accessForm" autocomplete="off">
+      <label for="code">ENTER ACCESS CODE:</label>
+      <input type="password" id="code" placeholder="&#9500;&#8212; code required &#8212;&#9472;" required>
+      <button type="submit">ACCESS FILE</button>
+      <div class="error" id="err"></div>
+    </form>
+  </div>
+</section>
+
+<!-- Shown only after a correct code -->
+<section id="content">
+  <div class="browser-bar">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="address">https://<b>www.page-not-found-here.net</b>/archive/case/69-3147</div>
+  </div>
+
+  <header class="error-header">
+    <div class="code">404</div>
+    <div class="etitle">Oops! This page could not be found.</div>
+    <p class="esub">
+      The address you entered may be wrong, outdated, or no longer available.<br>
+      You may have landed here by mistake.
+    </p>
+    <div class="divider"></div>
+  </header>
+
+  <main class="card">
+    <div class="card-label">Recovered document</div>
+    <img id="sketch" src="https://raw.githubusercontent.com/ThePranavWay/HUNT/refs/heads/main/Case%20Suspect%20Sketch.png" alt="Suspect sketch">
+  </main>
+
+  <div class="actions">
+    <a class="btn" href="#" onclick="location.reload();return false;">Try Again</a>
+    <a class="btn alt" href="#" onclick="history.back();return false;">Go Back</a>
+  </div>
+
+  <footer>Error reference: 404-GK69-3147 &middot; Please check the URL and try again.</footer>
+</section>
+
+<script src="/level-session.js?v=team-2"></script>
+<script>
+  const form = document.getElementById('accessForm');
+  const input = document.getElementById('code');
+  const feedback = document.getElementById('err');
+  const button = form.querySelector('button');
+  let verifying = false;
+  function reveal() {
+    feedback.textContent = '';
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('content').classList.add('show');
+  }
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (verifying || !form.reportValidity()) return;
+    verifying = true; button.disabled = true; feedback.textContent = 'Checking and saving…';
+    const password = input.value; input.value = '';
+    try { await ZodiacLevels.verify(1, password); reveal(); }
+    catch (error) { ZodiacLevels.errorMessage(error, feedback); input.focus(); }
+    finally { verifying = false; button.disabled = false; }
+  });
+  ZodiacLevels.watch(1, () => reveal());
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","spa":2}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4afa7ba5ac2a74e',t:'MTc5MjA3NjAyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

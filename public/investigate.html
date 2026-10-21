@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bay Area Press Repository — Restricted File</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cormorant+Garamond:wght@400;600;700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f0e6cf;
+    --paper-dark: #e6d9bc;
+    --paper-card: #f7efdd;
+    --ink: #2c1d0f;
+    --ink-faint: #634b2e;
+    --brown: #7a4f23;
+    --gold: #a8882a;
+    --gold-light: #c9a846;
+    --red-stamp: #9a2a20;
+    --tape: rgba(201, 178, 105, 0.55);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Special Elite', 'Courier New', monospace;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    position: relative;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0, transparent 24px, rgba(122,79,35,0.04) 24px, rgba(122,79,35,0.04) 25px),
+      radial-gradient(ellipse at top left, rgba(168,136,42,0.08), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(122,79,35,0.1), transparent 60%);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.28 0 0 0 0 0.12 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: multiply;
+  }
+
+  /* ==== PASSWORD GATE ==== */
+  #gate {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--paper);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #gate.hidden { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+
+  .gate-panel {
+    background: var(--paper-card);
+    border: 1px solid var(--ink-faint);
+    padding: 45px 45px 40px;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    box-shadow: 3px 5px 20px rgba(44,29,15,0.2), inset 0 0 60px rgba(122,79,35,0.05);
+  }
+  .gate-panel::before, .gate-panel::after {
+    content: '';
+    position: absolute;
+    width: 70px;
+    height: 18px;
+    background: var(--tape);
+    top: -8px;
+  }
+  .gate-panel::before { left: 25px; transform: rotate(-4deg); }
+  .gate-panel::after { right: 25px; transform: rotate(3deg); }
+
+  .restricted-stamp {
+    position: absolute;
+    top: 22px;
+    right: -10px;
+    transform: rotate(18deg);
+    color: var(--red-stamp);
+    border: 3px solid var(--red-stamp);
+    padding: 6px 14px;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  .gate-header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--ink-faint);
+  }
+  .gate-letterhead {
+    font-family: 'Old Standard TT', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .gate-title {
+    font-family: 'Old Standard TT', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin: 8px 0;
+  }
+  .gate-sub {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .gate-warning {
+    font-size: 0.7rem;
+    line-height: 1.6;
+    color: var(--ink-faint);
+    border-top: 1px dashed var(--ink-faint);
+    border-bottom: 1px dashed var(--ink-faint);
+    padding: 12px 0;
+    margin: 18px 0;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+  .gate-label {
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-top: 12px;
+  }
+  .password-field {
+    width: 100%;
+    padding: 10px 12px;
+    background: #fff9ea;
+    border: 1px solid var(--ink-faint);
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    color: var(--ink);
+    margin-top: 8px;
+    outline: none;
+  }
+  .password-field:focus { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .gate-submit {
+    width: 100%;
+    margin-top: 18px;
+    padding: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .gate-submit:hover { background: var(--brown); }
+  .gate-error {
+    color: var(--red-stamp);
+    font-size: 0.78rem;
+    margin-top: 10px;
+    text-align: center;
+    min-height: 18px;
+  }
+  .gate-shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .file-number {
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    text-align: right;
+    margin-bottom: 5px;
+  }
+
+  /* ==== ACCESS GRANTED STAMP ==== */
+  #archive { position: relative; z-index: 1; opacity: 0; transition: opacity 0.8s ease; display: none; }
+  #archive.visible { opacity: 1; display: block; }
+
+  .access-granted-stamp {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(-20deg);
+    color: var(--gold);
+    border: 5px double var(--gold);
+    padding: 15px 35px;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .access-granted-stamp.show { animation: stampShow 1.8s ease forwards; }
+  @keyframes stampShow {
+    0% { opacity: 0; transform: translate(-50%,-50%) rotate(-20deg) scale(2); }
+    20% { opacity: 0.9; transform: translate(-50%,-50%) rotate(-20deg) scale(1); }
+    80% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+
+  /* ==== ARCHIVE HEADER ==== */
+  .archive-header {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 25px 25px;
+    position: relative;
+  }
+  .declassified-stamp {
+    position: absolute;
+    top: 35px;
+    right: 30px;
+    transform: rotate(-12deg);
+    color: var(--red-stamp);
+    border: 3px solid var(--red-stamp);
+    padding: 5px 12px;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.15em;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
+  .letterhead-top {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 6px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .archive-title {
+    font-family: 'Old Standard TT', serif;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.03em;
+    margin: 15px 0 10px;
+  }
+  .archive-sub {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .archive-meta {
+    max-width: 720px;
+    margin: 18px auto 0;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--ink-faint);
+    border-bottom: 1px solid var(--ink-faint);
+    padding: 12px 0;
+  }
+  .archive-meta strong { color: var(--ink); font-weight: 700; }
+
+  /* ==== FILE TABS ==== */
+  .file-tabs {
+    max-width: 1000px;
+    margin: 28px auto 0;
+    padding: 0 25px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink-faint);
+  }
+  .file-tab {
+    background: var(--paper-dark);
+    padding: 8px 18px;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    cursor: pointer;
+    border: 1px solid var(--ink-faint);
+    border-bottom: none;
+    text-transform: uppercase;
+    font-family: 'Special Elite', monospace;
+    text-decoration: none;
+  }
+  .file-tab.active, .file-tab:hover { background: var(--paper-card); color: var(--ink); border-color: var(--ink); }
+
+  /* ==== CLIPPINGS GRID — each in own column, sealed ==== */
+  .clippings-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 25px 25px 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 32px;
+  }
+
+  .file-card {
+    background: var(--paper-card);
+    border: 1px solid var(--ink-faint);
+    padding: 0;
+    position: relative;
+    box-shadow: 2px 3px 12px rgba(44,29,15,0.15);
+    overflow: hidden;
+  }
+  .file-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 10px;
+    background: repeating-linear-gradient(90deg, var(--paper-dark) 0, var(--paper-dark) 10px, transparent 10px, transparent 12px);
+    z-index: 4;
+  }
+
+  /* SEALED STATE */
+  .file-card.sealed .file-card-inner {
+    padding: 40px 18px 22px;
+    text-align: center;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .file-card.sealed .file-card-tape {
+    position: absolute;
+    width: 100px;
+    height: 28px;
+    background: var(--tape);
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    z-index: 5;
+  }
+  .file-card.sealed:nth-child(even) .file-card-tape { transform: translateX(-50%) rotate(3deg); }
+  .file-card.sealed:nth-child(3n) .file-card-tape { left: 30%; transform: translateX(-50%) rotate(-6deg); }
+  .file-card.sealed:nth-child(5n) .file-card-tape { left: 70%; transform: translateX(-50%) rotate(5deg); }
+
+  .sealed-stamp {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    transform: rotate(14deg);
+    color: var(--red-stamp);
+    border: 2px solid var(--red-stamp);
+    padding: 4px 10px;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+  .sealed-wax {
+    margin-top: 15px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c04030, #8a2010 60%, #5a1008);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0d4a8;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .sealed-wax::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 2px dashed rgba(240,212,168,0.3);
+    border-radius: 50%;
+  }
+
+  .sealed-meta {
+    width: 100%;
+    margin-top: 18px;
+  }
+  .sealed-id {
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .sealed-source {
+    font-family: 'Old Standard TT', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 6px 0 4px;
+  }
+  .sealed-date {
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+  .sealed-class {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--red-stamp);
+    border: 1px solid var(--red-stamp);
+    padding: 3px 8px;
+    display: inline-block;
+    margin: 4px 0 14px;
+  }
+  .open-file-btn {
+    width: 100%;
+    padding: 9px;
+    background: var(--paper-dark);
+    border: 1px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: 'Special Elite', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .open-file-btn:hover { background: var(--ink); color: var(--paper); }
+  .open-file-btn::before { content: '▶ '; }
+
+  /* OPENED STATE */
+  .file-card.opened .file-card-inner {
+    padding: 38px 18px 22px;
+    animation: unfold 0.6s ease;
+  }
+  @keyframes unfold {
+    from { opacity: 0; transform: scaleY(0.3); transform-origin: top; }
+    to { opacity: 1; transform: scaleY(1); }
+  }
+  .file-card.opened .file-card-tape {
+    position: absolute;
+    width: 90px;
+    height: 22px;
+    background: var(--tape);
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    z-index: 5;
+  }
+  .file-card.opened:nth-child(even) .file-card-tape { transform: translateX(-50%) rotate(3deg); }
+  .file-card.opened:nth-child(3n) .file-card-tape { left: 30%; transform: translateX(-50%) rotate(-5deg); }
+  .file-card.opened:nth-child(5n) .file-card-tape { left: 70%; transform: translateX(-50%) rotate(4deg); }
+
+  .file-stamp {
+    position: absolute;
+    top: 42px;
+    right: 10px;
+    transform: rotate(-8deg);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    padding: 3px 9px;
+    font-family: 'Old Standard TT', serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
+
+  .file-header {
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+  .file-id {
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .file-source {
+    font-family: 'Old Standard TT', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 5px 0;
+  }
+  .file-date { font-size: 0.76rem; color: var(--ink-faint); }
+
+  .file-image-wrap {
+    border: 1px solid var(--ink-faint);
+    padding: 5px;
+    background: #fff9ea;
+    cursor: pointer;
+    position: relative;
+  }
+  .file-image-wrap img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    display: block;
+    filter: sepia(0.35) contrast(0.95);
+    transition: filter 0.3s;
+  }
+  .file-image-wrap:hover img { filter: sepia(0.15) contrast(1); }
+
+  .microfilm-label {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(240, 230, 207, 0.92);
+    padding: 2px 6px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+
+  .file-note {
+    margin-top: 12px;
+    font-size: 0.76rem;
+    line-height: 1.6;
+    color: var(--ink);
+    border-top: 1px dashed var(--ink-faint);
+    padding-top: 10px;
+  }
+  .file-note::before {
+    content: 'ARCHIVIST NOTE: ';
+    color: var(--brown);
+    font-weight: bold;
+  }
+
+  .handwritten {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--red-stamp);
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-top: 8px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+
+  .hidden-ref {
+    margin-top: 12px;
+    text-align: right;
+    font-size: 0.52rem;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+    opacity: 0.35;
+    font-family: 'Special Elite', monospace;
+    user-select: text;
+    pointer-events: none;
+    word-break: break-all;
+  }
+
+  /* ==== LIGHTBOX (microfilm reader) ==== */
+  .lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44, 29, 15, 0.95);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    cursor: zoom-out;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox-frame {
+    background: var(--paper-card);
+    padding: 18px;
+    border: 2px solid var(--ink-faint);
+    max-width: 90vw;
+    max-height: 90vh;
+    position: relative;
+    box-shadow: 0 0 50px rgba(168,136,42,0.2);
+  }
+  .lightbox-frame img {
+    max-width: 100%;
+    max-height: 78vh;
+    display: block;
+    object-fit: contain;
+    filter: sepia(0.25);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: -42px;
+    right: 0;
+    background: var(--paper);
+    border: 1px solid var(--ink-faint);
+    color: var(--ink);
+    padding: 5px 15px;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+  .lightbox-close:hover { background: var(--ink); color: var(--paper); }
+  .lightbox-ref {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+  }
+
+  /* ==== FOOTER (authentic, minimal) ==== */
+  footer {
+    border-top: 2px solid var(--ink);
+    padding: 18px 25px;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  /* Case log */
+  #notes {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px 25px 50px;
+    position: relative;
+    z-index: 1;
+    display: none;
+  }
+  #notes.visible { display: block; }
+  #notes h2 {
+    font-family: 'Old Standard TT', serif;
+    font-size: 1.3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    letter-spacing: 0.08em;
+  }
+  #notes p {
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+  #notes strong { letter-spacing: 0.05em; }
+
+  @media (max-width: 650px) {
+    .clippings-grid { grid-template-columns: 1fr; gap: 28px; padding: 15px; }
+    .file-image-wrap img { height: 230px; }
+    .gate-panel { padding: 30px 22px; }
+    .restricted-stamp { font-size: 0.85rem; top: 10px; }
+    .declassified-stamp { font-size: 0.78rem; top: 20px; right: 15px; }
+    .archive-header { padding-top: 60px; }
+    .letterhead-top { flex-direction: column; gap: 4px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div class="gate-panel" id="gatePanel">
+    <div class="restricted-stamp">Restricted</div>
+    <div class="file-number">BAY AREA PRESS REPOSITORY<br>FORM BAPR-19 (Rev. 1/69)</div>
+    <div class="gate-header">
+      <div class="gate-letterhead">Bay Area Press Repository</div>
+      <div class="gate-title">CASE FILE ACCESS</div>
+      <div class="gate-sub">San Francisco, California — Newspaper Microfilm &amp; Clippings Archive</div>
+    </div>
+    <div class="gate-warning">
+      THIS RECORD HAS BEEN TRANSFERRED FROM ACTIVE CASE FILES. UNAUTHORIZED ACCESS, DUPLICATION, OR DISTRIBUTION OF THESE MATERIALS IS PROHIBITED UNDER STATE ARCHIVES REGULATION §412.7.
+    </div>
+    <label class="gate-label">ENTER ACCESS CODE:</label>
+    <input type="password" class="password-field" id="passwordInput" autocomplete="off" placeholder="— code required —" autofocus>
+    <button class="gate-submit" id="submitBtn">Access File</button>
+    <div class="gate-error" id="gateError"></div>
+  </div>
+</div>
+
+<div class="access-granted-stamp" id="grantedStamp">Access Granted</div>
+
+<!-- MAIN ARCHIVE -->
+<div id="archive">
+  <header class="archive-header">
+    <div class="declassified-stamp">Declassified</div>
+    <div class="letterhead-top">
+      <span>BAY AREA PRESS REPOSITORY — SAN FRANCISCO, CA</span>
+      <span>ACCESSION #BAPR-1968-74-Z</span>
+    </div>
+    <h1 class="archive-title">PRESS CLIPPINGS FILE: UNSOLVED CASE</h1>
+    <div class="archive-sub">SAN FRANCISCO BAY AREA — DECEMBER 1968 TO PRESENT</div>
+    <div class="archive-meta">
+      <strong>SOURCE:</strong> Microfilm reels of the <em>San Francisco Chronicle</em>, <em>San Francisco Examiner</em>, <em>Vallejo Times-Herald</em>, <em>Napa Valley Register</em>, and affiliated regional publications, 1968–1974.<br><br>
+      <strong>DESCRIPTION:</strong> Collection of front-page and regional news clippings related to the unidentified subject known to correspondents as "ZODIAC." Files contain reports on attacks, investigative bulletins, published cipher fragments, and letters received by editorial offices. Materials preserved as originally printed, with editorial markings intact.
+    </div>
+  </header>
+
+  <nav class="file-tabs">
+    <a href="#clippings" class="file-tab active" data-target="clippings">Clippings File</a>
+    <a href="#notes" class="file-tab" data-target="notes">Case Log</a>
+  </nav>
+
+  <section class="clippings-grid" id="clippings"></section>
+
+  <section id="notes">
+    <h2>INVESTIGATIVE LOG — KEY DATES</h2>
+    <p><strong>DEC 20 1968:</strong> David Faraday, 17, and Betty Lou Jensen, 16, shot to death on Lake Herman Road, Benicia.</p>
+    <p><strong>JUL 4 1969:</strong> Darlene Ferrin killed; Mike Mageau wounded at Blue Rock Springs Park, Vallejo. Subject places phone call to Vallejo PD claiming responsibility.</p>
+    <p><strong>AUG 1 1969:</strong> Three Bay Area newspapers receive identical letters from subject, each containing one-third of a 408-symbol cipher.</p>
+    <p><strong>AUG 8 1969:</strong> Cipher decoded by Salinas schoolteacher Donald Harden and wife Bettye.</p>
+    <p><strong>SEP 27 1969:</strong> Bryan Hartnell and Cecelia Shepard stabbed at Lake Berryessa, Napa County. Shepard dies of injuries 29 SEP.</p>
+    <p><strong>OCT 11 1969:</strong> Cab driver Paul Stine shot in Presidio Heights, SF. Three teen witnesses observe subject.</p>
+    <p><strong>OCT 1969:</strong> Subject threatens school bus children in letter to <em>Chronicle</em>. Armed patrols deployed.</p>
+    <p><strong>MAR 22 1970:</strong> Kathleen Johns reports abduction near Modesto; subject later claims credit.</p>
+    <p><strong>1970–1974:</strong> Continued correspondence received by <em>Chronicle</em>, including additional ciphers and references to victim count.</p>
+  </section>
+
+  <footer>
+    BAY AREA PRESS REPOSITORY &nbsp;•&nbsp; SAN FRANCISCO, CALIFORNIA
+  </footer>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-frame" onclick="event.stopPropagation()">
+    <button class="lightbox-close" onclick="closeLightbox()">[ CLOSE ]</button>
+    <img id="lbImg" src="" alt="">
+    <div class="lightbox-ref" id="lbRef"></div>
+  </div>
+</div>
+
+<script src="/level-session.js?v=team-2"></script>
+<script>
+// Password verification and progress recording are performed by the shared backend.
+
+const GITHUB_RAW = "https://raw.githubusercontent.com/ThePranavWay/HUNT/refs/heads/main/clipping";
+
+const clippings = [
+  { id: "SFPD-69-008", src: "San Francisco Examiner", date: "November 12, 1969", file: GITHUB_RAW + "1.jpg", note: "Summary of seven confirmed attacks and subject's claims of additional victims. Composite sketches distributed statewide.", annotation: "FBI joins investigation", hiddenRef: "ref. https://github.com/ThePranavWay/HUNT/blob/main/README.md" },
+  { id: "SFPD-69-003", src: "San Francisco Chronicle", date: "August 2, 1969", file: GITHUB_RAW + "2.jpg", note: "Coverage of triplicate letters received by three Bay Area papers. Cipher fragments printed at subject's demand; public asked to assist decryption.", annotation: "First use of 'Zodiac' signature" },
+  { id: "SFPD-69-007", src: "San Francisco Chronicle", date: "October 21, 1969", file: GITHUB_RAW + "3.jpg", note: "Publication of Zodiac letter threatening school children. Napa and Vallejo school districts place armed guards on bus routes.", annotation: "Public panic peak" },
+  { id: "SFPD-69-005", src: "Napa Valley Register", date: "September 29, 1969", file: GITHUB_RAW + "4.jpg", note: "Report of knife attack at Lake Berryessa. Victim Cecelia Shepard in critical condition at time of print; Bryan Hartnell in stable condition.", annotation: "Change in MO - knife" },
+  { id: "SFPD-69-006", src: "San Francisco Chronicle", date: "October 13, 1969", file: GITHUB_RAW + "5.jpg", note: "Cab driver Paul Stine found shot in Presidio Heights. Initial report classed as robbery; Zodiac letter two days later claims credit.", annotation: "Composite sketch issued" },
+  { id: "SFPD-69-001", src: "Vallejo Times-Herald", date: "December 22, 1968", file: GITHUB_RAW + "6.jpg", note: "Front-page report of double homicide on Lake Herman Road. Initial investigation by Vallejo Sheriff's office; no suspects named at time of print.", annotation: "First known incident?" },
+  { id: "SFPD-69-002", src: "Vallejo Times-Herald", date: "July 6, 1969", file: GITHUB_RAW + "7.jpg", note: "Report of Fourth of July shooting at Blue Rock Springs. Draws connection to December Lake Herman Road double murder based on ballistic evidence.", annotation: "MO matches" },
+  { id: "SFPD-69-004", src: "San Francisco Examiner", date: "August 12, 1969", file: GITHUB_RAW + "8.jpg", note: "Illustration of the crosshair symbol used by subject in correspondence. Symbol becomes widely associated with case throughout Bay Area.", annotation: "File under: Symbology" },
+  { id: "SFPD-70-009", src: "San Francisco Chronicle", date: "July 27, 1970", file: GITHUB_RAW + "9.jpg", note: "Subject claims 17 victims in letter received this date. SFPD confirms 5 deaths and 2 injuries attributed to Zodiac at time of publication.", annotation: "Victim count disputed" },
+  { id: "SFPD-74-010", src: "San Francisco Chronicle", date: "February 4, 1974", file: GITHUB_RAW + "10.jpg", note: "First letter received from subject in nearly three years. Praises the film <em>The Exorcist</em> as 'the best saterical comidy that I have ever seen.'", annotation: "Correspondence resumes" }
+];
+
+// Build file cards — each starts SEALED
+const grid = document.getElementById('clippings');
+clippings.forEach((c, i) => {
+  const card = document.createElement('div');
+  card.className = 'file-card sealed';
+  card.dataset.idx = i;
+
+  card.innerHTML = `
+    <div class="file-card-inner">
+      <div class="file-card-tape"></div>
+      <div class="sealed-stamp">Sealed File</div>
+      <div class="sealed-wax">Z</div>
+      <div class="sealed-meta">
+        <div class="sealed-id">
+          <span>FILE ${c.id}</span>
+          <span>CLIP ${String(i+1).padStart(2,'0')}/10</span>
+        </div>
+        <div class="sealed-source">${c.src}</div>
+        <div class="sealed-date">${c.date}</div>
+        <div class="sealed-class">CONFIDENTIAL — CASE FILE</div>
+        <button class="open-file-btn" onclick="openFile(${i})">Open File</button>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+// Open an individual file (swap sealed → opened)
+const openedState = {};
+function openFile(i) {
+  const c = clippings[i];
+  const card = document.querySelector(`.file-card[data-idx="${i}"]`);
+  if (!card || card.classList.contains('opened')) return;
+
+  card.classList.remove('sealed');
+  card.classList.add('opened');
+
+  card.querySelector('.file-card-inner').innerHTML = `
+    <div class="file-card-tape"></div>
+    <div class="file-stamp">Opened</div>
+    <div class="file-header">
+      <div class="file-id">
+        <span>FILE ${c.id}</span>
+        <span>CLIP ${String(i+1).padStart(2,'0')}/10</span>
+      </div>
+      <div class="file-source">${c.src}</div>
+      <div class="file-date">${c.date}</div>
+    </div>
+    <div class="file-image-wrap" onclick="openLB('${c.file}', '${c.id} — ${c.src}, ${c.date}')">
+      <img src="${c.file}" alt="${c.src} clipping, ${c.date}" loading="lazy">
+      <div class="microfilm-label">MICROFILM SCAN</div>
+    </div>
+    <div class="file-note">${c.note}</div>
+    <span class="handwritten">${c.annotation}</span>
+    ${c.hiddenRef ? `<div class="hidden-ref">${c.hiddenRef}</div>` : ''}
+  `;
+  openedState[i] = true;
+}
+
+// Password gate
+const gate = document.getElementById('gate');
+const archive = document.getElementById('archive');
+const pwdInput = document.getElementById('passwordInput');
+const submitBtn = document.getElementById('submitBtn');
+const errEl = document.getElementById('gateError');
+const gatePanel = document.getElementById('gatePanel');
+const stamp = document.getElementById('grantedStamp');
+
+
+let verifying = false;
+function revealArchive(animate = true) {
+  errEl.textContent = '';
+  if (animate) stamp.classList.add('show');
+  gate.classList.add('hidden'); gate.style.display = 'none';
+  archive.style.display = 'block';
+  setTimeout(() => archive.classList.add('visible'), 50);
+  setTimeout(() => stamp.classList.remove('show'), 2000);
+}
+async function unlock() {
+  if (verifying) return;
+  if (!pwdInput.value.trim()) { errEl.textContent = 'ACCESS CODE REQUIRED'; return; }
+  verifying = true; submitBtn.disabled = true; errEl.textContent = 'Checking and saving…';
+  const password = pwdInput.value; pwdInput.value = '';
+  try { await ZodiacLevels.verify(2, password); revealArchive(); }
+  catch (error) {
+    ZodiacLevels.errorMessage(error, errEl);
+    gatePanel.classList.remove('gate-shake'); void gatePanel.offsetWidth;
+    gatePanel.classList.add('gate-shake'); pwdInput.focus();
+  } finally { verifying = false; submitBtn.disabled = false; }
+}
+submitBtn.addEventListener('click', unlock);
+pwdInput.addEventListener('keydown', event => { if (event.key === 'Enter') {event.preventDefault(); unlock();} });
+// No shared bapr_access flag. Resume only if this authenticated student completed this specific level.
+ZodiacLevels.watch(2, () => revealArchive(false));
+
+// Lightbox
+function openLB(src, ref) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lbRef').textContent = ref;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// Tab switching
+document.querySelectorAll('.file-tab').forEach(tab => {
+  tab.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.file-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.target;
+    document.getElementById('clippings').style.display = target === 'clippings' ? 'grid' : 'none';
+    const notes = document.getElementById('notes');
+    if (target === 'notes') { notes.classList.add('visible'); } else { notes.classList.remove('visible'); }
+  });
+});
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4af091199f6a7a6',t:'MTc5MjA2OTUyNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
